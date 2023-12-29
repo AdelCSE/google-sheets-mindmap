@@ -8,19 +8,24 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "14.0.1",
     "@mirohq/miro-api": "^2.0.0",
-    "mirotone": "5",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "cookie": "^0.5.0",
+    "d3-dsv": "^3.0.1",
     "dotenv": "^16.0.3",
-    "cookie": "^0.5.0"
+    "mirotone": "^5.1.0",
+    "next": "14.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@mirohq/websdk-types": "latest",
-    "typescript": "4.9.5",
+    "@types/cookie": "^0.5.1",
+    "@types/d3-dsv": "^3.0.7",
     "@types/node": "^18.8.2",
     "@types/react": "^18.0.24",
-    "@types/cookie": "^0.5.1"
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.4.0",
+    "typescript": "4.9.5"
   }
 }
