@@ -2,7 +2,6 @@ import React from "react";
 import { Board } from "@mirohq/miro-api";
 
 import initMiroAPI from "../utils/initMiroAPI";
-import "../assets/style.css";
 
 const getBoards = async () => {
   const { miro, userId } = initMiroAPI();
