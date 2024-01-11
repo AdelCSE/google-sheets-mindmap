@@ -1,56 +1,37 @@
-import React from "react";
-import { Board } from "@mirohq/miro-api";
-
-import initMiroAPI from "../utils/initMiroAPI";
-
-const getBoards = async () => {
-  const { miro, userId } = initMiroAPI();
-
-  // redirect to auth url if user has not authorized the app
-  if (!userId || !(await miro.isAuthorized(userId))) {
-    return {
-      authUrl: miro.getAuthUrl(),
-    };
-  }
-
-  const api = miro.as(userId);
-
-  const boards: Board[] = [];
-  for await (const board of api.getAllBoards()) {
-    boards.push(board);
-  }
-
-  return {
-    boards,
-  };
-};
+import { GoogleSheets } from "../components/GoogleSheets/GoogleSheets";
+import { Miro } from "../components/Miro/Miro";
+import Tabs from "../components/Tabs";
+import {
+  generateAuthURL,
+  getSheetData,
+  getDocumentSheets,
+  getUserDocuments,
+  isSignedIn,
+  setSheetData,
+} from "../lib/sheets";
 
 export default async function Page() {
-  const { boards, authUrl } = await getBoards();
+  const authURL = await generateAuthURL();
+
+  if (isSignedIn()) {
+    const docs = await getUserDocuments();
+    console.log(docs);
+
+    const sheets = await getDocumentSheets(docs[0].id!);
+    console.log(sheets);
+
+    const data = await getSheetData(docs[0].id!, sheets[0]);
+    console.log(data);
+
+    await setSheetData(docs[0].id!, sheets[0], [["does", "this"], ["work"]]);
+  }
 
   return (
-    <div>
-      <h3>API usage demo</h3>
-      <p className='p-small'>API Calls need to be authenticated</p>
-      <p>
-        Apps that use the API usually would run on your own domain. During
-        development, test on http://localhost:3000
-      </p>
-      {authUrl ? (
-        <a className='button button-primary' href={authUrl}>
-          Login
-        </a>
-      ) : (
-        <>
-          <p>This is a list of all the boards that your user has access to:</p>
-
-          <ul>
-            {boards?.map((board) => (
-              <li key={board.name}>{board.name}</li>
-            ))}
-          </ul>
-        </>
-      )}
+    <div className="grid">
+      <Tabs
+        sheetsComponent={<GoogleSheets authURL={authURL} />}
+        miroComponent={<Miro />}
+      />
     </div>
   );
 }
