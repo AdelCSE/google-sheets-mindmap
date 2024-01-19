@@ -4,7 +4,7 @@ import key from "../../secret.json";
 export const auth = new google.auth.OAuth2(
   key.web.client_id,
   key.web.client_secret,
-  key.web.redirect_uris[0],
+  key.web.redirect_uris[0]
 );
 
 export const isSignedIn = () => !!auth.credentials.access_token;
@@ -63,9 +63,9 @@ export const getSheetData = async (documentId: string, sheetName: string) => {
 export const setSheetData = async (
   documentId: string,
   sheetName: string,
-  data: string[][],
+  data: string[][]
 ) => {
-  if (!isSignedIn()) return null;
+  if (!isSignedIn()) return false;
 
   const sheets = google.sheets({ version: "v4", auth });
 
