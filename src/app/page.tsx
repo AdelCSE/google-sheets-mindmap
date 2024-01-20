@@ -1,11 +1,12 @@
 import { GoogleSheets } from "../components/GoogleSheets/GoogleSheets";
 import { Miro } from "../components/Miro/Miro";
-import { SignIn } from "../components/SignIn/SignIn";
 import Tabs from "../components/Tabs";
 import {
   createDocumentSheet,
   generateAuthURL,
+  getDocumentSheets,
   isSignedIn,
+  setSheetData,
 } from "../lib/sheets";
 
 export default async function Page() {
@@ -23,11 +24,22 @@ export default async function Page() {
     return createDocumentSheet(title);
   };
 
+  const setMindmapData = async (id: any, data: string[][]) => {
+    "use server";
+    const sheets = await getDocumentSheets(id);
+    await setSheetData(id, sheets[0], data);
+  };
+
   return (
-    <div className="grid">
+    <div className='grid'>
       <Tabs
         sheetsComponent={<GoogleSheets authURL={authURL} SignedIn={SignedIn} />}
-        miroComponent={<Miro createNewSheet={createNewSheet} />}
+        miroComponent={
+          <Miro
+            createNewSheet={createNewSheet}
+            setMindmapData={setMindmapData}
+          />
+        }
       />
     </div>
   );

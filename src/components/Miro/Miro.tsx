@@ -6,8 +6,10 @@ import Loader from "../Modal/Loader";
 
 export const Miro = ({
   createNewSheet,
+  setMindmapData,
 }: {
   createNewSheet: (title: string) => Promise<string | null | undefined>;
+  setMindmapData: (id: any, data: string[][]) => Promise<void>;
 }) => {
   const [isItemSelected, setIsItemSelected] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState<any>();
@@ -23,7 +25,7 @@ export const Miro = ({
 
       // Filter mindmap roots from the selected items
       const mindmapRoot = selection.filter(
-        (item) => item.type === "mindmap" && item.parentId === null,
+        (item) => item.type === "mindmap" && item.parentId === null
       );
       const selectedLength = mindmapRoot.length;
 
@@ -39,31 +41,31 @@ export const Miro = ({
     });
   }, []);
 
-  useEffect(() => {
-    // Log data whenever it changes
-    console.log("Updated Data:", data);
-  }, [data]);
-
   const handleConvertClick = async () => {
     if (!CheckErrors()) {
+      setLoading(true);
+      if (selectedItem) {
+        const root = await miro.board.experimental.get({
+          type: "mindmap_node",
+        });
+        const nodesList: string[][] = [];
 
-    if (selectedItem) {
-      const root = await miro.board.experimental.get({ type: "mindmap_node" });
-      const nodesList: string[][] = [];
+        for (const node of root) {
+          await traverse(node, nodesList, []);
+        }
 
-      for (const node of root) {
-        await traverse(node, nodesList, []);
+        setData(reverseRows(filterRows(nodesList)));
+        const spreadsheetId = await createNewSheet(title);
+        await setMindmapData(spreadsheetId, data);
+        setLoading(false);
       }
-
-      setData(reverseRows(filterRows(nodesList)));
-      await createNewSheet("AAAAAAAAAAA");
     }
   };
 
   const traverse = async (
     node: MindmapNode,
     data: string[][],
-    path: string[],
+    path: string[]
   ) => {
     const content = node.nodeView.content;
     const children = await node.getChildren();
@@ -89,7 +91,7 @@ export const Miro = ({
 
       // Check if nextRow contains all elements of currentRow
       const containsAll: boolean = currentRow.every((elem) =>
-        nextRow.includes(elem),
+        nextRow.includes(elem)
       );
 
       if (!containsAll) {
@@ -128,7 +130,7 @@ export const Miro = ({
   };
 
   return (
-    <div className='flex flex-col w-full items-center gap-4 mt-6 px-2'>
+    <div className='flex flex-col w-full items-center gap-4 mt-4 px-2'>
       <h3 className='font-semibold'>Convert from Miro</h3>
       {isItemSelected ? (
         <>
@@ -163,6 +165,19 @@ export const Miro = ({
             Select from the board the root node of the mindmap you'd like to
             convert !
           </p>
+          <div className='mt-6'>
+            <p className='font-bold mb-2'>How to use ?</p>
+            <p className='font-medium'>
+              Select the root node, name your spreadsheet and click on convert !
+            </p>
+            <div className='mt-4 flex flex-col w-fit p-4 gap-2 justify-center items-center border-2 border-dashed border-black rounded-2xl'>
+              <img
+                className='w-full'
+                alt='Mindmap example'
+                src='mindmapExample.png'
+              />
+            </div>
+          </div>
         </>
       )}
       {errorType === "EMPTY_TITLE" && (
