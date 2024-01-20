@@ -1,10 +1,12 @@
 "use client";
 
+import { MindmapNode } from "@mirohq/websdk-types";
 import React, { useEffect } from "react";
 
 export const Miro = () => {
   const [isItemSelected, setIsItemSelected] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState<any>();
+  const [data, setData] = React.useState<string[][]>([]);
 
   useEffect(() => {
     // Listen to selection updates
@@ -18,7 +20,7 @@ export const Miro = () => {
       const selectedLength = mindmapRoot.length;
 
       // Check to see if one mindmap root is selected
-      if (selectedLength == 1) {
+      if (selectedLength === 1) {
         setIsItemSelected(true);
         setSelectedItem(mindmapRoot[0]);
       } else {
@@ -28,10 +30,73 @@ export const Miro = () => {
     });
   }, []);
 
-  const handleConvertClick = () => {
-    //handle convert mindmap to spreadsheet
-    console.log("Mindmap root id:" + selectedItem.id);
+  useEffect(() => {
+    // Log data whenever it changes
+    console.log("Updated Data:", data);
+  }, [data]);
+
+  const handleConvertClick = async () => {
+    if (selectedItem) {
+      const root = await miro.board.experimental.get({ type: 'mindmap_node' });
+      const nodesList: string[][] = [];
+
+      for (const node of root) {
+        await traverse(node, nodesList, []);
+      }
+
+      setData(reverseRows(filterRows(nodesList)));
+    }
   };
+
+  const traverse = async (node: MindmapNode, data: string[][], path: string[]) => {
+    const content = node.nodeView.content;
+    const children = await node.getChildren();
+
+    // Create a new path for the current node
+    const currentPath = [...path, content];
+
+    // Push the current path to the array
+    data.push(currentPath);
+
+    // Traverse each child with the updated path
+    for (const child of children) {
+      await traverse(child, data, currentPath);
+    }
+  };
+
+  function filterRows(input: string[][]): string[][] {
+    const output: string[][] = [];
+    let currentRow: string[] = input[0];
+  
+    for (let i = 1; i < input.length; i++) {
+      const nextRow: string[] = input[i];
+  
+      // Check if nextRow contains all elements of currentRow
+      const containsAll: boolean = currentRow.every((elem) => nextRow.includes(elem));
+  
+      if (!containsAll) {
+        output.push(currentRow);
+      }
+  
+      // Update currentRow for the next iteration
+      currentRow = nextRow;
+    }
+  
+    // Add the last row to the output
+    output.push(currentRow);
+  
+    return output;
+  }
+
+  function reverseRows(input: string[][]): string[][] {
+    const reversedRows: string[][] = [];
+  
+    for (let i = input.length - 1; i >= 0; i--) {
+      reversedRows.push([...input[i]]);
+    }
+  
+    return reversedRows;
+  }
 
   return (
     <div className='flex flex-col w-full items-center gap-4 mt-6 px-2'>
