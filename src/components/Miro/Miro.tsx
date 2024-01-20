@@ -2,11 +2,15 @@
 
 import { MindmapNode } from "@mirohq/websdk-types";
 import React, { useEffect } from "react";
+import Loader from "../Modal/Loader";
 
 export const Miro = () => {
   const [isItemSelected, setIsItemSelected] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState<any>();
   const [data, setData] = React.useState<string[][]>([]);
+  const [loading, setLoading] = React.useState<boolean>(false);
+  const [title, setTitle] = React.useState<string>("");
+  const [errorType, setErrorType] = React.useState<string>("NO_ERROR");
 
   useEffect(() => {
     // Listen to selection updates
@@ -20,6 +24,7 @@ export const Miro = () => {
       const selectedLength = mindmapRoot.length;
 
       // Check to see if one mindmap root is selected
+      setErrorType("NO_ERROR");
       if (selectedLength === 1) {
         setIsItemSelected(true);
         setSelectedItem(mindmapRoot[0]);
@@ -36,19 +41,29 @@ export const Miro = () => {
   }, [data]);
 
   const handleConvertClick = async () => {
-    if (selectedItem) {
-      const root = await miro.board.experimental.get({ type: 'mindmap_node' });
-      const nodesList: string[][] = [];
+    if (!CheckErrors()) {
+      if (selectedItem) {
+        setLoading(true);
+        const root = await miro.board.experimental.get({
+          type: "mindmap_node",
+        });
+        const nodesList: string[][] = [];
 
-      for (const node of root) {
-        await traverse(node, nodesList, []);
+        for (const node of root) {
+          await traverse(node, nodesList, []);
+        }
+
+        setData(reverseRows(filterRows(nodesList)));
+        setLoading(false);
       }
-
-      setData(reverseRows(filterRows(nodesList)));
     }
   };
 
-  const traverse = async (node: MindmapNode, data: string[][], path: string[]) => {
+  const traverse = async (
+    node: MindmapNode,
+    data: string[][],
+    path: string[]
+  ) => {
     const content = node.nodeView.content;
     const children = await node.getChildren();
 
@@ -67,63 +82,92 @@ export const Miro = () => {
   function filterRows(input: string[][]): string[][] {
     const output: string[][] = [];
     let currentRow: string[] = input[0];
-  
+
     for (let i = 1; i < input.length; i++) {
       const nextRow: string[] = input[i];
-  
+
       // Check if nextRow contains all elements of currentRow
-      const containsAll: boolean = currentRow.every((elem) => nextRow.includes(elem));
-  
+      const containsAll: boolean = currentRow.every((elem) =>
+        nextRow.includes(elem)
+      );
+
       if (!containsAll) {
         output.push(currentRow);
       }
-  
+
       // Update currentRow for the next iteration
       currentRow = nextRow;
     }
-  
+
     // Add the last row to the output
     output.push(currentRow);
-  
+
     return output;
   }
 
   function reverseRows(input: string[][]): string[][] {
     const reversedRows: string[][] = [];
-  
+
     for (let i = input.length - 1; i >= 0; i--) {
       reversedRows.push([...input[i]]);
     }
-  
+
     return reversedRows;
   }
+
+  const CheckErrors = () => {
+    setErrorType("NO_ERROR");
+    if (title === "") {
+      setErrorType("EMPTY_TITLE");
+      return true;
+    } else {
+      setErrorType("NO_ERROR");
+      return false;
+    }
+  };
 
   return (
     <div className='flex flex-col w-full items-center gap-4 mt-6 px-2'>
       <h3 className='font-semibold'>Convert from Miro</h3>
-      <p className='font-medium text-center'>
-        Select from the board the root node of the mindmap you'd like to convert
-        !
-      </p>
+      {isItemSelected ? (
+        <>
+          <div className='flex flex-col w-full gap-4 items-start'>
+            <label className='font-[14px]'>
+              Enter a spreadsheet name <span className='text-red-500'>*</span>
+            </label>
+            <input
+              className='input'
+              type='text'
+              placeholder='Enter a spreadsheet name ...'
+              required={true}
+              onChange={(e) => {
+                setErrorType("NO_ERROR");
+                setTitle(e.target.value);
+              }}
+            />
 
-      <img className='import-github-image' src='' draggable={false} />
-
-      <button
-        className='button button-primary w-fit'
-        type='button'
-        disabled={!isItemSelected}
-        onClick={handleConvertClick}
-      >
-        Convert to spreadsheet
-      </button>
-
-      <div className='mt-6'>
-        <p className='font-bold mb-2'>Synced changes !</p>
-        <p>
-          Any changes you apply, either in Miro or in Google Sheets, are synced
-          between both tools.
-        </p>
-      </div>
+            <button
+              className='w-full px-8 sm:px-10 py-2.5 text-center font-semibold rounded-lg border-[#232227] border-[2px] bg-white shadow-[5px_5px_0px_#232227] cursor-pointer transition-all hover:shadow-none hover:translate-x-[5px] hover:translate-y-[5px]'
+              type='button'
+              disabled={!isItemSelected}
+              onClick={handleConvertClick}
+            >
+              Convert to spreadsheet
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <p className='font-medium text-center'>
+            Select from the board the root node of the mindmap you'd like to
+            convert !
+          </p>
+        </>
+      )}
+      {errorType === "EMPTY_TITLE" && (
+        <p className='text-red-500'>Please enter a spreadsheet name</p>
+      )}
+      {loading && <Loader />}
     </div>
   );
 };
