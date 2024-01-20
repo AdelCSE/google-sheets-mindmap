@@ -4,7 +4,7 @@ import key from "../../secret.json";
 export const auth = new google.auth.OAuth2(
   key.web.client_id,
   key.web.client_secret,
-  key.web.redirect_uris[0]
+  key.web.redirect_uris[0],
 );
 
 export const isSignedIn = () => !!auth.credentials.access_token;
@@ -47,6 +47,22 @@ export const getDocumentSheets = async (documentId: string) => {
   return data.sheets.map((sheet: any) => sheet.properties.title);
 };
 
+export const createDocumentSheet = async (title: string) => {
+  if (!isSignedIn()) return null;
+  const sheets = google.sheets({ version: "v4", auth });
+
+  const sheet = await sheets.spreadsheets.create({
+    requestBody: {
+      properties: {
+        title,
+      },
+    },
+    fields: "spreadsheetId",
+  });
+
+  return sheet.data.spreadsheetId;
+};
+
 export const getSheetData = async (documentId: string, sheetName: string) => {
   if (!isSignedIn()) return [];
 
@@ -63,7 +79,7 @@ export const getSheetData = async (documentId: string, sheetName: string) => {
 export const setSheetData = async (
   documentId: string,
   sheetName: string,
-  data: string[][]
+  data: string[][],
 ) => {
   if (!isSignedIn()) return false;
 

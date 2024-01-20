@@ -72,7 +72,7 @@ export default function ModalContent({
       setSelectedSheets((previousState) => [...previousState, sheetId]);
     } else {
       const updatedSheets = selectedSheets.filter(
-        (currentSheetId) => currentSheetId !== sheetId
+        (currentSheetId) => currentSheetId !== sheetId,
       );
       setSelectedSheets([...updatedSheets]);
     }
@@ -118,16 +118,16 @@ export default function ModalContent({
   };
 
   return (
-    <div className='flex flex-col'>
-      <p className='text-center text-3xl font-bold'>
+    <div className="flex flex-col">
+      <p className="text-center text-3xl font-bold">
         Choose from Google Sheets
       </p>
-      <div className='flex flex-col items-start gap-4 mt-8'>
-        <label className='font-[14px]'>
-          Select Spreadsheet <span className='text-red-500'>*</span>
+      <div className="flex flex-col items-start gap-4 mt-8">
+        <label className="font-[14px]">
+          Select Spreadsheet <span className="text-red-500">*</span>
         </label>
         <select
-          className='select'
+          className="select"
           required={true}
           defaultValue={-1}
           onChange={(e) => {
@@ -151,16 +151,16 @@ export default function ModalContent({
         </select>
       </div>
 
-      <div className='mt-12'>
+      <div className="mt-12">
         {loading ? (
-          <div className='flex justify-center'>
+          <div className="flex justify-center">
             <Loader />
           </div>
         ) : (
           selectedSpreadsheet !== undefined && (
             <>
               <Header />
-              <div className='flex flex-col gap-4 mt-6'>
+              <div className="flex flex-col gap-4 mt-6">
                 {sheets &&
                   sheets.map((sheet: any, index: any) => (
                     <div key={index}>
@@ -175,28 +175,28 @@ export default function ModalContent({
           )
         )}
       </div>
-      <div className='flex flex-col font-bold mt-6'>
+      <div className="flex flex-col font-bold mt-6">
         <button
-          className='px-8 sm:px-10 py-2.5 text-center rounded-lg border-[#232227] border-[2px] bg-white shadow-[5px_5px_0px_#232227] cursor-pointer transition-all hover:shadow-none hover:translate-x-[5px] hover:translate-y-[5px]'
-          type='button'
+          className="px-8 sm:px-10 py-2.5 text-center rounded-lg border-[#232227] border-[2px] bg-white shadow-[5px_5px_0px_#232227] cursor-pointer transition-all hover:shadow-none hover:translate-x-[5px] hover:translate-y-[5px]"
+          type="button"
           onClick={handleImportClick}
         >
           Convert to Mind Map
         </button>
-        <div className='font-semibold mt-4'>
+        <div className="font-semibold mt-4">
           {errorType === "EMPTY_SPREADSHEET" && (
-            <p className='text-red-500'>Please select a spreadsheet</p>
+            <p className="text-red-500">Please select a spreadsheet</p>
           )}
           {errorType === "EMPTY_SHEET" && (
-            <p className='text-red-500'>Please select a sheet</p>
+            <p className="text-red-500">Please select a sheet</p>
           )}
           {errorType === "MULTIPLE_SHEETS" && (
-            <p className='text-red-500'>
+            <p className="text-red-500">
               Please select only one sheet at a time
             </p>
           )}
           {converting && (
-            <div className='flex justify-center'>
+            <div className="flex justify-center">
               <Loader />
             </div>
           )}
