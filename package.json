@@ -13,9 +13,9 @@
     "cookie": "^0.5.0",
     "d3-dsv": "^3.0.1",
     "dotenv": "^16.0.3",
-
     "framer-motion": "^10.18.0",
     "fs": "^0.0.1-security",
+    "gapi-script": "^1.2.0",
     "googleapis": "^130.0.0",
     "http2": "^3.3.7",
     "mirotone": "^5.1.0",
