@@ -4,7 +4,11 @@ import { MindmapNode } from "@mirohq/websdk-types";
 import React, { useEffect } from "react";
 import Loader from "../Modal/Loader";
 
-export const Miro = () => {
+export const Miro = ({
+  createNewSheet,
+}: {
+  createNewSheet: (title: string) => Promise<string | null | undefined>;
+}) => {
   const [isItemSelected, setIsItemSelected] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState<any>();
   const [data, setData] = React.useState<string[][]>([]);
@@ -19,7 +23,7 @@ export const Miro = () => {
 
       // Filter mindmap roots from the selected items
       const mindmapRoot = selection.filter(
-        (item) => item.type === "mindmap" && item.parentId === null
+        (item) => item.type === "mindmap" && item.parentId === null,
       );
       const selectedLength = mindmapRoot.length;
 
@@ -42,27 +46,24 @@ export const Miro = () => {
 
   const handleConvertClick = async () => {
     if (!CheckErrors()) {
-      if (selectedItem) {
-        setLoading(true);
-        const root = await miro.board.experimental.get({
-          type: "mindmap_node",
-        });
-        const nodesList: string[][] = [];
 
-        for (const node of root) {
-          await traverse(node, nodesList, []);
-        }
+    if (selectedItem) {
+      const root = await miro.board.experimental.get({ type: "mindmap_node" });
+      const nodesList: string[][] = [];
 
-        setData(reverseRows(filterRows(nodesList)));
-        setLoading(false);
+      for (const node of root) {
+        await traverse(node, nodesList, []);
       }
+
+      setData(reverseRows(filterRows(nodesList)));
+      await createNewSheet("AAAAAAAAAAA");
     }
   };
 
   const traverse = async (
     node: MindmapNode,
     data: string[][],
-    path: string[]
+    path: string[],
   ) => {
     const content = node.nodeView.content;
     const children = await node.getChildren();
@@ -88,7 +89,7 @@ export const Miro = () => {
 
       // Check if nextRow contains all elements of currentRow
       const containsAll: boolean = currentRow.every((elem) =>
-        nextRow.includes(elem)
+        nextRow.includes(elem),
       );
 
       if (!containsAll) {
