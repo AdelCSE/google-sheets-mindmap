@@ -6,20 +6,17 @@ import { createMindmap } from "../lib/mindmap";
 import Header from "./Modal/Header";
 import SheetRows from "./Modal/SheetRow";
 import Loader from "./Modal/Loader";
+import {
+  getSheetresult,
+  getDocumentSheets,
+  getUserDocuments,
+} from "../lib/sheets";
 
-export default function ModalContent({
-  docs,
-  getSheets,
-  getSheetsData,
-}: {
-  docs: any;
-  getSheets: (id: any) => any;
-  getSheetsData: (sheetsIdList: any[], docId: any) => any;
-}) {
+export default function ModalContent({}) {
   /** Store Selected Spreadsheet and Sheets **/
 
-  const [selectedSheets, setSelectedSheets] = React.useState<Number[]>([]);
-  const [selectedSpreadsheet, setSelectedSpreadsheet] = useState<Number>();
+  const [selectedSheets, setSelectedSheets] = React.useState<string[]>([]);
+  const [selectedSpreadsheet, setSelectedSpreadsheet] = useState<string>();
 
   /** Store Loading States **/
 
@@ -33,46 +30,44 @@ export default function ModalContent({
   /** Store information pulled from Google Sheet API **/
 
   const [spreadsheets, setSpreadsheets] = useState<Spreadsheet[]>([]);
-  const [sheets, setSheets] = useState<String[]>([]);
+  const [sheets, setSheets] = useState<string[]>([]);
 
   /** Fetch Spreadsheets **/
 
   useEffect(() => {
-    const apiData: any = docs;
-    if (apiData) {
-      const convertedData: Spreadsheet[] = apiData.map((spreadsheet: any) => {
+    getUserDocuments().then((data: any) => {
+      const convertedData: Spreadsheet[] = data.map((spreadsheet: any) => {
         return {
           id: spreadsheet.id,
           name: spreadsheet.name,
         };
       });
       setSpreadsheets(convertedData);
-    }
-  }, [docs]);
+    });
+  }, []);
 
   /** Fetch Sheets **/
 
   useEffect(() => {
     if (selectedSpreadsheet !== undefined) {
-      const Result = async () => {
-        let result = await getSheets(selectedSpreadsheet);
-        setSheets(result);
-        setLoading(false);
-      };
-
-      Result();
+      getDocumentSheets(spreadsheets[parseInt(selectedSpreadsheet)].id!).then(
+        (data: any) => {
+          setSheets(data);
+          setLoading(false);
+        }
+      );
     }
   }, [selectedSpreadsheet]);
 
   /** Handle Sheet Rows Selection **/
 
-  const handleSheetSelect = (isChecked: boolean, sheetId: any) => {
+  const handleSheetSelect = (isChecked: boolean, sheet: string) => {
     setErrorType("NO_ERROR");
     if (isChecked) {
-      setSelectedSheets((previousState) => [...previousState, sheetId]);
+      setSelectedSheets((previousState) => [...previousState, sheet]);
     } else {
       const updatedSheets = selectedSheets.filter(
-        (currentSheetId) => currentSheetId !== sheetId,
+        (currentSheet) => currentSheet !== sheet
       );
       setSelectedSheets([...updatedSheets]);
     }
@@ -82,9 +77,15 @@ export default function ModalContent({
 
   const handleImportClick = async () => {
     if (!CheckForErrors()) {
-      setConverting(true);
-      const result = await getSheetsData(selectedSheets, selectedSpreadsheet);
-      ConvertToMindmap(result);
+      if (selectedSpreadsheet !== undefined) {
+        getSheetresult(
+          spreadsheets[parseInt(selectedSpreadsheet)].id!,
+          sheets[0]
+        ).then((data: any) => {
+          setConverting(true);
+          ConvertToMindmap(data);
+        });
+      }
     }
   };
 
@@ -104,7 +105,7 @@ export default function ModalContent({
 
   const CheckForErrors = () => {
     setErrorType("NO_ERROR");
-    if (selectedSpreadsheet === undefined || selectedSpreadsheet === -1) {
+    if (selectedSpreadsheet === undefined || selectedSpreadsheet === "-1") {
       setErrorType("EMPTY_SPREADSHEET");
       return true;
     } else if (selectedSheets.length === 0) {
@@ -118,23 +119,23 @@ export default function ModalContent({
   };
 
   return (
-    <div className="flex flex-col">
-      <p className="text-center text-3xl font-bold">
+    <div className='flex flex-col'>
+      <p className='text-center text-3xl font-bold'>
         Choose from Google Sheets
       </p>
-      <div className="flex flex-col items-start gap-4 mt-8">
-        <label className="font-[14px]">
-          Select Spreadsheet <span className="text-red-500">*</span>
+      <div className='flex flex-col items-start gap-4 mt-8'>
+        <label className='font-[14px]'>
+          Select Spreadsheet <span className='text-red-500'>*</span>
         </label>
         <select
-          className="select"
+          className='select'
           required={true}
           defaultValue={-1}
           onChange={(e) => {
             setSelectedSheets([]);
             setErrorType("NO_ERROR");
             setLoading(true);
-            setSelectedSpreadsheet(parseInt(e.target.value));
+            setSelectedSpreadsheet(e.target.value);
           }}
         >
           <option value={-1} disabled>
@@ -151,22 +152,22 @@ export default function ModalContent({
         </select>
       </div>
 
-      <div className="mt-12">
+      <div className='mt-12'>
         {loading ? (
-          <div className="flex justify-center">
+          <div className='flex justify-center'>
             <Loader />
           </div>
         ) : (
           selectedSpreadsheet !== undefined && (
             <>
               <Header />
-              <div className="flex flex-col gap-4 mt-6">
+              <div className='flex flex-col gap-4 mt-6'>
                 {sheets &&
                   sheets.map((sheet: any, index: any) => (
                     <div key={index}>
                       <SheetRows
                         title={sheet}
-                        onSelect={(value) => handleSheetSelect(value, index)}
+                        onSelect={(value) => handleSheetSelect(value, sheet)}
                       />
                     </div>
                   ))}
@@ -175,28 +176,28 @@ export default function ModalContent({
           )
         )}
       </div>
-      <div className="flex flex-col font-bold mt-6">
+      <div className='flex flex-col font-bold mt-6'>
         <button
-          className="px-8 sm:px-10 py-2.5 text-center rounded-lg border-[#232227] border-[2px] bg-white shadow-[5px_5px_0px_#232227] cursor-pointer transition-all hover:shadow-none hover:translate-x-[5px] hover:translate-y-[5px]"
-          type="button"
+          className='px-8 sm:px-10 py-2.5 text-center rounded-lg border-[#232227] border-[2px] bg-white shadow-[5px_5px_0px_#232227] cursor-pointer transition-all hover:shadow-none hover:translate-x-[5px] hover:translate-y-[5px]'
+          type='button'
           onClick={handleImportClick}
         >
           Convert to Mind Map
         </button>
-        <div className="font-semibold mt-4">
+        <div className='font-semibold mt-4'>
           {errorType === "EMPTY_SPREADSHEET" && (
-            <p className="text-red-500">Please select a spreadsheet</p>
+            <p className='text-red-500'>Please select a spreadsheet</p>
           )}
           {errorType === "EMPTY_SHEET" && (
-            <p className="text-red-500">Please select a sheet</p>
+            <p className='text-red-500'>Please select a sheet</p>
           )}
           {errorType === "MULTIPLE_SHEETS" && (
-            <p className="text-red-500">
+            <p className='text-red-500'>
               Please select only one sheet at a time
             </p>
           )}
           {converting && (
-            <div className="flex justify-center">
+            <div className='flex justify-center'>
               <Loader />
             </div>
           )}

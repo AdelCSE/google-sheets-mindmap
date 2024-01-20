@@ -7,8 +7,7 @@ interface AuthContextType {
   signIn: () => void;
   signOut: () => void;
 }
-
-let gapi: any;
+export let gapi: any;
 
 const authContext = createContext<AuthContextType>({} as AuthContextType);
 

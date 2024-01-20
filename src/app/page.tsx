@@ -5,7 +5,6 @@ import { GoogleSheets } from "../components/GoogleSheets/GoogleSheets";
 import { Miro } from "../components/Miro/Miro";
 import { getDocumentSheets, getUserDocuments } from "../lib/sheets";
 
-
 export default function Page() {
   const auth = useAuth();
   const [selectedTab, setSelectedTab] = useState("sheets");
@@ -19,43 +18,51 @@ export default function Page() {
     })();
   }, [auth.isSignedIn]);
 
-
   if (!auth.isLoaded) return null;
 
   if (!auth.isSignedIn) return <button onClick={auth.signIn}>login</button>;
 
   const setMindmapData = async (id: any, data: string[][]) => {
-    "use server";
     const sheets = await getDocumentSheets(id);
-    await setSheetData(id, sheets[0], data);
+    //await setSheetData(id, sheets[0], data);
   };
 
   return (
-    <div className="grid">
-      <div className="cs1 ce12">
-        <div className="tabs">
-          <div className="tabs-header-list">
-            <div
-              tabIndex={0}
-              className={`tab ${selectedTab === "sheets" && "tab-active"}`}
-              onClick={() => setSelectedTab("sheets")}
-            >
-              <div className="tab-text tab-badge">
-                Select from Google Sheets
+    <div className='flex flex-col w-full'>
+      <div className='grid'>
+        <div className='cs1 ce12'>
+          <div className='tabs'>
+            <div className='tabs-header-list'>
+              <div
+                tabIndex={0}
+                className={`tab ${selectedTab === "sheets" && "tab-active"}`}
+                onClick={() => setSelectedTab("sheets")}
+              >
+                <div className='tab-text tab-badge'>
+                  Select from Google Sheets
+                </div>
               </div>
-            </div>
-            <div
-              tabIndex={0}
-              className={`tab ${selectedTab === "miro" && "tab-active"}`}
-              onClick={() => setSelectedTab("miro")}
-            >
-              <div className="tab-text tab-badge">Convert from Miro</div>
+              <div
+                tabIndex={0}
+                className={`tab ${selectedTab === "miro" && "tab-active"}`}
+                onClick={() => setSelectedTab("miro")}
+              >
+                <div className='tab-text tab-badge'>Convert from Miro</div>
+              </div>
             </div>
           </div>
         </div>
+        <div className='cs1 ce12'>
+          {selectedTab === "sheets" ? <GoogleSheets /> : <Miro />}
+        </div>
       </div>
-      <div className="cs1 ce12">
-        {selectedTab === "sheets" ? <GoogleSheets /> : <Miro />}
+      <div className='mx-2 mt-4 flex w-full'>
+        <button
+          className='flex w-full py-2 border-4 border-red-600 text-red-600 justify-center text-center font-semibold rounded-lg cursor-pointer transition-all hover:bg-red-600 hover:text-white'
+          onClick={auth.signOut}
+        >
+          Sign out
+        </button>
       </div>
     </div>
   );

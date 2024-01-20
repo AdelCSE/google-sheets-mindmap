@@ -49,11 +49,10 @@ export const Miro: React.FC = () => {
         }
 
         setData(reverseRows(filterRows(nodesList)));
-        const spreadsheetId = await createNewSheet(title);
-        await setMindmapData(spreadsheetId, data);
+        //const spreadsheetId = await createNewSheet(title);
+        //await setMindmapData(spreadsheetId, data);
         setLoading(false);
       }
-      setData(reverseRows(filterRows(nodesList)));
     }
   };
 
