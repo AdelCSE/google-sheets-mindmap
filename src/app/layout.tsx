@@ -1,6 +1,7 @@
 import "../assets/style.css";
 import Script from "next/script";
 import { MiroSDKInit } from "../components/SDKInit";
+import { AuthContextProvider } from "../contexts/authContext";
 
 export default function RootLayout({ children }) {
   return (
@@ -17,7 +18,9 @@ export default function RootLayout({ children }) {
           strategy="beforeInteractive"
         />
         <MiroSDKInit />
-        <div id="root">{children}</div>
+        <div id="root">
+          <AuthContextProvider>{children}</AuthContextProvider>
+        </div>
       </body>
     </html>
   );

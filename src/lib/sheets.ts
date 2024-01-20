@@ -1,57 +1,26 @@
-import { google } from "googleapis";
-import key from "../../secret.json";
-
-export const auth = new google.auth.OAuth2(
-  key.web.client_id,
-  key.web.client_secret,
-  key.web.redirect_uris[0],
-);
-
-export const isSignedIn = () => !!auth.credentials.access_token;
-
-export const generateAuthURL = async () => {
-  const authorizeUrl = auth.generateAuthUrl({
-    access_type: "offline",
-    scope: [
-      "https://www.googleapis.com/auth/spreadsheets",
-      "https://www.googleapis.com/auth/drive.readonly",
-    ],
-  });
-  return authorizeUrl;
-};
-
+import { gapi } from "gapi-script";
 export const getUserDocuments = async () => {
-  if (!isSignedIn()) return [];
-
-  const drive = google.drive({ version: "v3", auth });
-
-  const { data } = await drive.files.list({
+  const { result } = await gapi.client.drive.files.list({
     q: "mimeType='application/vnd.google-apps.spreadsheet'",
     fields: "nextPageToken, files(id, name)",
   });
 
-  return data.files || [];
+  return result.files || [];
 };
 
 export const getDocumentSheets = async (documentId: string) => {
-  if (!isSignedIn()) return [];
-  const sheets = google.sheets({ version: "v4", auth });
-
-  const { data } = await sheets.spreadsheets.get({
+  const { result } = await gapi.client.sheets.spreadsheets.get({
     spreadsheetId: documentId,
     fields: "sheets.properties",
   });
 
-  if (!data.sheets?.length) return [];
+  if (!result.sheets?.length) return [];
 
-  return data.sheets.map((sheet: any) => sheet.properties.title);
+  return result.sheets.map((sheet: any) => sheet.properties.title);
 };
 
 export const createDocumentSheet = async (title: string) => {
-  if (!isSignedIn()) return null;
-  const sheets = google.sheets({ version: "v4", auth });
-
-  const sheet = await sheets.spreadsheets.create({
+  const sheet = await gapi.client.sheets.spreadsheets.create({
     requestBody: {
       properties: {
         title,
@@ -60,42 +29,34 @@ export const createDocumentSheet = async (title: string) => {
     fields: "spreadsheetId",
   });
 
-  return sheet.data.spreadsheetId;
+  return sheet.result.spreadsheetId;
 };
 
-export const getSheetData = async (documentId: string, sheetName: string) => {
-  if (!isSignedIn()) return [];
-
-  const sheets = google.sheets({ version: "v4", auth });
-
-  const response = await sheets.spreadsheets.values.get({
+export const getSheetresult = async (documentId: string, sheetName: string) => {
+  const response = await gapi.client.sheets.spreadsheets.values.get({
     spreadsheetId: documentId,
     range: sheetName,
   });
 
-  return response.data.values || [];
+  return response.result.values || [];
 };
 
-export const setSheetData = async (
+export const setSheetresult = async (
   documentId: string,
   sheetName: string,
-  data: string[][],
+  result: string[][],
 ) => {
-  if (!isSignedIn()) return false;
-
-  const sheets = google.sheets({ version: "v4", auth });
-
-  await sheets.spreadsheets.values.clear({
+  await gapi.client.sheets.spreadsheets.values.clear({
     spreadsheetId: documentId,
     range: sheetName,
   });
 
-  await sheets.spreadsheets.values.update({
+  await gapi.client.sheets.spreadsheets.values.update({
     spreadsheetId: documentId,
     range: sheetName,
     valueInputOption: "RAW",
     requestBody: {
-      values: data,
+      values: result,
     },
   });
 
