@@ -13,5 +13,5 @@ export async function GET(request: NextApiRequest) {
 
   auth.credentials = tokens;
 
-  return redirect("/");
+  return redirect("/auth");
 }
