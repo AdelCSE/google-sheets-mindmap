@@ -32,7 +32,7 @@ export const Miro = () => {
 
   useEffect(() => {
     // Log data whenever it changes
-    console.log("Updated Data:", reverseRows(filterRows(data)));
+    console.log("Updated Data:", data);
   }, [data]);
 
   const handleConvertClick = async () => {
@@ -44,7 +44,7 @@ export const Miro = () => {
         await traverse(node, nodesList, []);
       }
 
-      setData(nodesList);
+      setData(reverseRows(filterRows(nodesList)));
     }
   };
 
