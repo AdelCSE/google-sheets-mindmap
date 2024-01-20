@@ -1,5 +1,5 @@
-import { gapi } from "gapi-script";
 export const getUserDocuments = async () => {
+  const gapi = (await import("gapi-script")).gapi;
   const { result } = await gapi.client.drive.files.list({
     q: "mimeType='application/vnd.google-apps.spreadsheet'",
     fields: "nextPageToken, files(id, name)",
@@ -9,6 +9,7 @@ export const getUserDocuments = async () => {
 };
 
 export const getDocumentSheets = async (documentId: string) => {
+  const gapi = (await import("gapi-script")).gapi;
   const { result } = await gapi.client.sheets.spreadsheets.get({
     spreadsheetId: documentId,
     fields: "sheets.properties",
@@ -20,6 +21,7 @@ export const getDocumentSheets = async (documentId: string) => {
 };
 
 export const createDocumentSheet = async (title: string) => {
+  const gapi = (await import("gapi-script")).gapi;
   const sheet = await gapi.client.sheets.spreadsheets.create({
     requestBody: {
       properties: {
@@ -33,6 +35,7 @@ export const createDocumentSheet = async (title: string) => {
 };
 
 export const getSheetresult = async (documentId: string, sheetName: string) => {
+  const gapi = (await import("gapi-script")).gapi;
   const response = await gapi.client.sheets.spreadsheets.values.get({
     spreadsheetId: documentId,
     range: sheetName,
@@ -46,6 +49,7 @@ export const setSheetresult = async (
   sheetName: string,
   result: string[][],
 ) => {
+  const gapi = (await import("gapi-script")).gapi;
   await gapi.client.sheets.spreadsheets.values.clear({
     spreadsheetId: documentId,
     range: sheetName,
