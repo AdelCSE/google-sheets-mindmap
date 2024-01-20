@@ -1,16 +1,8 @@
 "use client";
 
-export const GoogleSheets: React.FC<{
-  authURL: string;
-  SignedIn: any;
-}> = ({ authURL, SignedIn }) => {
+export const GoogleSheets: React.FC = () => {
   const handleGoogleSheetsClick = async () => {
-    const isSignedIn = await SignedIn();
-    if (!isSignedIn) {
-      await window.open(authURL, "_blank");
-    } else {
-      openModal();
-    }
+    openModal();
   };
 
   const openModal = async () => {
@@ -36,6 +28,7 @@ export const GoogleSheets: React.FC<{
       >
         Choose from Google Sheets
       </button>
+
 
       <div className='mt-6'>
         <p className='font-bold mb-2'>How to use ?</p>

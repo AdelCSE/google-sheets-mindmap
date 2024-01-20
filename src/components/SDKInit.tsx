@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import {useEffect} from 'react';
+import { useEffect } from "react";
 
 export const MiroSDKInit = () => {
   useEffect(() => {
-    miro.board.ui.on('icon:click', async () => {
-      await miro.board.ui.openPanel({url: '/'});
+    miro.board.ui.on("icon:click", async () => {
+      await miro.board.ui.openPanel({ url: "/" });
     });
   });
 

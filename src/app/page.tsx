@@ -1,34 +1,56 @@
+"use client";
+import { useEffect, useState } from "react";
+import { useAuth } from "../contexts/authContext";
 import { GoogleSheets } from "../components/GoogleSheets/GoogleSheets";
 import { Miro } from "../components/Miro/Miro";
-import { SignIn } from "../components/SignIn/SignIn";
-import Tabs from "../components/Tabs";
-import {
-  createDocumentSheet,
-  generateAuthURL,
-  isSignedIn,
-} from "../lib/sheets";
+import { getDocumentSheets, getUserDocuments } from "../lib/sheets";
 
-export default async function Page() {
-  const authURL = await generateAuthURL();
 
-  const SignedIn = async () => {
-    "use server";
+export default function Page() {
+  const auth = useAuth();
+  const [selectedTab, setSelectedTab] = useState("sheets");
 
-    const signedIn = isSignedIn();
-    return signedIn;
-  };
+  useEffect(() => {
+    if (!auth.isSignedIn) return;
+    (async () => {
+      const docs = await getUserDocuments();
+      const sheets = await getDocumentSheets(docs[0].id);
+      console.log(sheets);
+    })();
+  }, [auth.isSignedIn]);
 
-  const createNewSheet = async (title: string) => {
-    "use server";
-    return createDocumentSheet(title);
-  };
+
+  if (!auth.isLoaded) return null;
+
+  if (!auth.isSignedIn) return <button onClick={auth.signIn}>login</button>;
 
   return (
     <div className="grid">
-      <Tabs
-        sheetsComponent={<GoogleSheets authURL={authURL} SignedIn={SignedIn} />}
-        miroComponent={<Miro createNewSheet={createNewSheet} />}
-      />
+      <div className="cs1 ce12">
+        <div className="tabs">
+          <div className="tabs-header-list">
+            <div
+              tabIndex={0}
+              className={`tab ${selectedTab === "sheets" && "tab-active"}`}
+              onClick={() => setSelectedTab("sheets")}
+            >
+              <div className="tab-text tab-badge">
+                Select from Google Sheets
+              </div>
+            </div>
+            <div
+              tabIndex={0}
+              className={`tab ${selectedTab === "miro" && "tab-active"}`}
+              onClick={() => setSelectedTab("miro")}
+            >
+              <div className="tab-text tab-badge">Convert from Miro</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="cs1 ce12">
+        {selectedTab === "sheets" ? <GoogleSheets /> : <Miro />}
+      </div>
     </div>
   );
 }

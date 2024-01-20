@@ -4,11 +4,7 @@ import { MindmapNode } from "@mirohq/websdk-types";
 import React, { useEffect } from "react";
 import Loader from "../Modal/Loader";
 
-export const Miro = ({
-  createNewSheet,
-}: {
-  createNewSheet: (title: string) => Promise<string | null | undefined>;
-}) => {
+export const Miro: React.FC = () => {
   const [isItemSelected, setIsItemSelected] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState<any>();
   const [data, setData] = React.useState<string[][]>([]);
@@ -56,7 +52,6 @@ export const Miro = ({
       }
 
       setData(reverseRows(filterRows(nodesList)));
-      await createNewSheet("AAAAAAAAAAA");
     }
   };
 
