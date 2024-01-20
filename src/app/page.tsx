@@ -5,6 +5,7 @@ import { GoogleSheets } from "../components/GoogleSheets/GoogleSheets";
 import { Miro } from "../components/Miro/Miro";
 import { getDocumentSheets, getUserDocuments } from "../lib/sheets";
 
+
 export default function Page() {
   const auth = useAuth();
   const [selectedTab, setSelectedTab] = useState("sheets");
@@ -17,6 +18,7 @@ export default function Page() {
       console.log(sheets);
     })();
   }, [auth.isSignedIn]);
+
 
   if (!auth.isLoaded) return null;
 
