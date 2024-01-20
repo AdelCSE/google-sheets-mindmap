@@ -1,5 +1,6 @@
 import { GoogleSheets } from "../components/GoogleSheets/GoogleSheets";
 import { Miro } from "../components/Miro/Miro";
+import { SignIn } from "../components/SignIn/SignIn";
 import Tabs from "../components/Tabs";
 import {
   createDocumentSheet,
@@ -12,6 +13,7 @@ export default async function Page() {
 
   const SignedIn = async () => {
     "use server";
+
     const signedIn = isSignedIn();
     return signedIn;
   };
