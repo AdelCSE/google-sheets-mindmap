@@ -24,6 +24,12 @@ export default function Page() {
 
   if (!auth.isSignedIn) return <button onClick={auth.signIn}>login</button>;
 
+  const setMindmapData = async (id: any, data: string[][]) => {
+    "use server";
+    const sheets = await getDocumentSheets(id);
+    await setSheetData(id, sheets[0], data);
+  };
+
   return (
     <div className="grid">
       <div className="cs1 ce12">
