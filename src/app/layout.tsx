@@ -1,7 +1,11 @@
 import "../assets/style.css";
 import Script from "next/script";
 import { MiroSDKInit } from "../components/SDKInit";
-import { AuthContextProvider } from "../contexts/authContext";
+import dynamic from "next/dynamic";
+
+const AuthContextProvider = dynamic(() => import("../contexts/authContext"), {
+  ssr: false,
+});
 
 export default function RootLayout({ children }) {
   return (

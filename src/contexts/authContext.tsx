@@ -1,5 +1,4 @@
 "use client";
-import { gapi } from "gapi-script";
 import { createContext, useContext, useEffect, useState } from "react";
 
 interface AuthContextType {
@@ -8,6 +7,8 @@ interface AuthContextType {
   signIn: () => void;
   signOut: () => void;
 }
+
+let gapi: any;
 
 const authContext = createContext<AuthContextType>({} as AuthContextType);
 
@@ -18,25 +19,27 @@ const DISCOVERY_DOCS = [
   "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest",
 ];
 
-export const AuthContextProvider: React.FC<React.PropsWithChildren> = ({
-  children,
-}) => {
+export default ({ children }) => {
   const [isSignedIn, setIsSignedIn] = useState<boolean>(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    gapi.load("client:auth2", async () => {
-      await gapi.client.init({
-        apiKey: "AIzaSyAaYKs5q92CeQs5sjY5iRGN5Q1AsBqIQvA",
-        discoveryDocs: DISCOVERY_DOCS,
-        scope:
-          "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.readonly",
-        clientId:
-          "846025308320-0vkcudds6s889souhdnlq3srgjoqrsd3.apps.googleusercontent.com",
+    import("gapi-script")
+      .then((m) => (gapi = m.gapi))
+      .then(() => {
+        gapi.load("client:auth2", async () => {
+          await gapi.client.init({
+            apiKey: "AIzaSyAaYKs5q92CeQs5sjY5iRGN5Q1AsBqIQvA",
+            discoveryDocs: DISCOVERY_DOCS,
+            scope:
+              "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.readonly",
+            clientId:
+              "846025308320-0vkcudds6s889souhdnlq3srgjoqrsd3.apps.googleusercontent.com",
+          });
+          setIsSignedIn(gapi.auth2.getAuthInstance().isSignedIn.get());
+          setIsLoaded(true);
+        });
       });
-      setIsSignedIn(gapi.auth2.getAuthInstance().isSignedIn.get());
-      setIsLoaded(true);
-    });
   }, []);
 
   const signIn = async () => {
