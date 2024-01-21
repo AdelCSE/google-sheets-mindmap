@@ -20,7 +20,27 @@ export default function Page() {
 
   if (!auth.isLoaded) return null;
 
-  if (!auth.isSignedIn) return <button onClick={auth.signIn}>login</button>;
+  if (!auth.isSignedIn)
+    return (
+      <div className='flex flex-col mt-8'>
+        <div className='flex w-full justify-center items-center'>
+          <img src='Google Sheets.png' className='w-16' />
+        </div>
+        <p className='text-xl text-center font-semibold mt-8'>
+          Connect to Google Sheets
+        </p>
+        <p className='text-[13px] text-center mt-2'>
+          Your Google Sheets account needs to be connected to Miro in order to
+          use this application.
+        </p>
+        <button
+          onClick={auth.signIn}
+          className=' mt-8 px-8 sm:px-10 py-2.5 text-center font-semibold rounded-lg border-[#232227] border-[2px] bg-white shadow-[5px_5px_0px_#232227] cursor-pointer transition-all hover:shadow-none hover:translate-x-[5px] hover:translate-y-[5px]'
+        >
+          Login with Google Sheets
+        </button>
+      </div>
+    );
 
   const setMindmapData = async (id: any, data: string[][]) => {
     const sheets = await getDocumentSheets(id);
@@ -56,9 +76,9 @@ export default function Page() {
           {selectedTab === "sheets" ? <GoogleSheets /> : <Miro />}
         </div>
       </div>
-      <div className='mx-2 mt-4 flex w-full'>
+      <div className='mt-4 flex w-full p-4'>
         <button
-          className='flex w-full py-2 border-4 border-red-600 text-red-600 justify-center text-center font-semibold rounded-lg cursor-pointer transition-all hover:bg-red-600 hover:text-white'
+          className='px-8 w-full sm:px-10 py-2.5 text-center font-semibold rounded-lg border-[#E84E36] border-[2px] bg-white shadow-[5px_5px_0px_#E84E36] cursor-pointer transition-all hover:shadow-none hover:translate-x-[5px] hover:translate-y-[5px]'
           onClick={auth.signOut}
         >
           Sign out

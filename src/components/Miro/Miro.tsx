@@ -3,6 +3,8 @@
 import { MindmapNode } from "@mirohq/websdk-types";
 import React, { useEffect } from "react";
 import Loader from "../Modal/Loader";
+import { createDocumentSheet, setSheetresult } from "../../lib/sheets";
+import { useAuth } from "../../contexts/authContext";
 
 export const Miro: React.FC = () => {
   const [isItemSelected, setIsItemSelected] = React.useState(false);
@@ -11,6 +13,7 @@ export const Miro: React.FC = () => {
   const [loading, setLoading] = React.useState<boolean>(false);
   const [title, setTitle] = React.useState<string>("");
   const [errorType, setErrorType] = React.useState<string>("NO_ERROR");
+  const auth = useAuth();
 
   useEffect(() => {
     // Listen to selection updates
@@ -48,10 +51,12 @@ export const Miro: React.FC = () => {
           await traverse(node, nodesList, []);
         }
 
-        setData(reverseRows(filterRows(nodesList)));
-        //const spreadsheetId = await createNewSheet(title);
-        //await setMindmapData(spreadsheetId, data);
-        setLoading(false);
+        setData(filterRows(nodesList));
+        createDocumentSheet(title).then((spreadsheetId) => {
+          setSheetresult(spreadsheetId, "Sheet1", data).then(() => {
+            setLoading(false);
+          });
+        });
       }
     }
   };
@@ -62,10 +67,15 @@ export const Miro: React.FC = () => {
     path: string[]
   ) => {
     const content = node.nodeView.content;
+    //regex to filter the <p> </p> tag
+    const replaced = content.replace(/<p[^>]*>/g, "");
+    const replaced2 = replaced.replace(/<\/p>/g, "");
+    console.log(replaced2);
+
     const children = await node.getChildren();
 
     // Create a new path for the current node
-    const currentPath = [...path, content];
+    const currentPath = [...path, replaced2];
 
     // Push the current path to the array
     data.push(currentPath);

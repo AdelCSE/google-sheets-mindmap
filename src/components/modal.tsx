@@ -6,6 +6,7 @@ import { createMindmap } from "../lib/mindmap";
 import Header from "./Modal/Header";
 import SheetRows from "./Modal/SheetRow";
 import Loader from "./Modal/Loader";
+import { useAuth } from "../contexts/authContext";
 import {
   getSheetresult,
   getDocumentSheets,
@@ -34,7 +35,10 @@ export default function ModalContent({}) {
 
   /** Fetch Spreadsheets **/
 
+  const auth = useAuth();
+
   useEffect(() => {
+    if (!auth.isLoaded) return;
     getUserDocuments().then((data: any) => {
       const convertedData: Spreadsheet[] = data.map((spreadsheet: any) => {
         return {
@@ -44,11 +48,12 @@ export default function ModalContent({}) {
       });
       setSpreadsheets(convertedData);
     });
-  }, []);
+  }, [auth.isLoaded]);
 
   /** Fetch Sheets **/
 
   useEffect(() => {
+    if (!auth.isLoaded) return;
     if (selectedSpreadsheet !== undefined) {
       getDocumentSheets(spreadsheets[parseInt(selectedSpreadsheet)].id!).then(
         (data: any) => {
@@ -57,7 +62,7 @@ export default function ModalContent({}) {
         }
       );
     }
-  }, [selectedSpreadsheet]);
+  }, [selectedSpreadsheet, auth.isLoaded]);
 
   /** Handle Sheet Rows Selection **/
 

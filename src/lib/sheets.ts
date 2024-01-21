@@ -25,12 +25,9 @@ export const getDocumentSheets = async (documentId: string) => {
 export const createDocumentSheet = async (title: string) => {
   if (!gapi) return;
   const sheet = await gapi.client.sheets.spreadsheets.create({
-    requestBody: {
-      properties: {
-        title,
-      },
+    properties: {
+      title,
     },
-    fields: "spreadsheetId",
   });
 
   return sheet.result.spreadsheetId;
@@ -61,7 +58,7 @@ export const setSheetresult = async (
     spreadsheetId: documentId,
     range: sheetName,
     valueInputOption: "RAW",
-    requestBody: {
+    resource: {
       values: result,
     },
   });
